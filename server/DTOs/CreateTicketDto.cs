@@ -1,6 +1,14 @@
-﻿namespace server.DTOs
+﻿
+
+using server.Models;
+using System;
+
+
+
+namespace server.DTOs
 {
-    public class CreateTicketDto
-    {
-    }
+    public record CreateTicketDto(string Title, Priority Priority, string Description)
+   ;
 }
+
+

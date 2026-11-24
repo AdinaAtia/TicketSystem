@@ -1,6 +1,11 @@
-﻿namespace server.DTOs
+﻿using server.Models;
+using System;
+
+
+
+
+namespace server.DTOs
 {
-    public class UpdateStatusDto
-    {
-    }
+    public record UpdateStatusDto(TicketStatus Status)
+    ;
 }

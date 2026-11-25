@@ -5,16 +5,18 @@ import { getTickets, createTicket, updateTicketStatus, deleteTicket } from './ap
 import TicketForm from './components/TicketForm';
 import TicketTable from './components/TicketTable';
 import { TicketStatus } from './types';
+import TicketFilters from './components/TicketFilters';
 const App = () => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
+  const [statusFilter, setStatusFilter] = useState<TicketStatus | ''>('');
+  const [search, setSearch] = useState('');
   const fetchTickets = async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await getTickets();
+const data = await getTickets(statusFilter === '' ? undefined : statusFilter);
       setTickets(data);
     } catch {
       setError('לא ניתן לטעון את הקריאות. בדקו שהשרת פועל ונסו שוב.');
@@ -48,16 +50,19 @@ const handleCreate = async (data: CreateTicketData) => {
     }
   };
   useEffect(() => {
-fetchTickets();  }, []);
-
+fetchTickets();  }, [statusFilter]);
+const filteredTickets = tickets.filter((t) =>
+  t.title.toLowerCase().includes(search.toLowerCase())
+);
   return (
-    <Box sx={{ p: 4, direction: 'rtl' }}>
+    <Box sx={{ p: 4 }}>
       <Typography variant="h4" sx={{ mb: 3 }}>ניהול קריאות שירות</Typography>
-
       {loading && <CircularProgress />}
       {error && <Alert severity="error">{error}</Alert>}
       <TicketForm onCreate={handleCreate} />
-<TicketTable tickets={tickets} onStatusChange={handleStatusChange} onDelete={handleDelete} />    </Box>
+      <TicketFilters status={statusFilter} onStatusChange={setStatusFilter} search={search} onSearchChange={setSearch} />
+
+<TicketTable tickets={filteredTickets} onStatusChange={handleStatusChange} onDelete={handleDelete} />    </Box>
     
   );
 };

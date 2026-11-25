@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Box, Typography, CircularProgress, Alert } from '@mui/material';
-import { getTickets } from './api/ticketsApi';
-import type { Ticket } from './types';
-
+import type { Ticket,CreateTicketData } from './types';
+import { getTickets, createTicket, updateTicketStatus, deleteTicket } from './api/ticketsApi';
+import TicketForm from './components/TicketForm';
+import TicketTable from './components/TicketTable';
+import { TicketStatus } from './types';
 const App = () => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(false);
@@ -20,7 +22,31 @@ const App = () => {
       setLoading(false);
     }
   };
+const handleCreate = async (data: CreateTicketData) => {
+    try {
+      const newTicket = await createTicket(data);
+      setTickets((prev) => [...prev, newTicket]);
+    } catch {
+      setError('לא ניתן לפתוח את הקריאה. נסו שוב.');
+    }
+  };
+    const handleDelete = async (id: number) => {
+    try {
+      await deleteTicket(id);
+      setTickets((prev) => prev.filter((t) => t.id !== id));
+    } catch {
+      setError('לא ניתן למחוק את הקריאה.');
+    }
+  };
 
+  const handleStatusChange = async (id: number, status: TicketStatus) => {
+    try {
+      const updated = await updateTicketStatus(id, status);
+      setTickets((prev) => prev.map((t) => (t.id === id ? updated : t)));
+    } catch {
+      setError('לא ניתן לעדכן את הסטטוס');
+    }
+  };
   useEffect(() => {
 fetchTickets();  }, []);
 
@@ -30,9 +56,9 @@ fetchTickets();  }, []);
 
       {loading && <CircularProgress />}
       {error && <Alert severity="error">{error}</Alert>}
-
-      <Typography>נמצאו {tickets.length} קריאות</Typography>
-    </Box>
+      <TicketForm onCreate={handleCreate} />
+<TicketTable tickets={tickets} onStatusChange={handleStatusChange} onDelete={handleDelete} />    </Box>
+    
   );
 };
 

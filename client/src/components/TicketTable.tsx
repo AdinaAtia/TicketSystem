@@ -1,6 +1,6 @@
 import {
    Typography, Table, TableBody, TableCell, TableContainer,IconButton,Paper
- , TableHead, TableRow,Tooltip,
+ , TableHead, TableRow,Tooltip,TextField,MenuItem
 } from '@mui/material';
 import { DeleteOutlined as DeleteOutlineIcon } from '@mui/icons-material';
 import { TicketStatus,Priority } from '../types';
@@ -11,6 +11,11 @@ interface TicketTableProps {
   onDelete: (id: number) => void;
 }
 
+const priorityLabels: Record<Priority, string> = {
+  [Priority.Low]: 'נמוכה',
+  [Priority.Medium]: 'בינונית',
+  [Priority.High]: 'גבוהה',
+};
 const TicketTable = ({ tickets, onStatusChange, onDelete }: TicketTableProps) => {
 
       return (
@@ -42,12 +47,15 @@ const TicketTable = ({ tickets, onStatusChange, onDelete }: TicketTableProps) =>
                   </TableCell>
 
                   <TableCell align="center">
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{ticket.priority}</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{priorityLabels[ticket.priority]}</Typography>
                   </TableCell>
 
                   <TableCell align="center">
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{ticket.status}</Typography>
-                  </TableCell>
+  <TextField select size="small" value={ticket.status} onChange={(e) => onStatusChange(ticket.id, Number(e.target.value) as TicketStatus)}>
+          <MenuItem value={TicketStatus.Open}>פתוח</MenuItem>
+          <MenuItem value={TicketStatus.InProgress}>בטיפול</MenuItem>
+          <MenuItem value={TicketStatus.Closed}>סגור</MenuItem>
+        </TextField>                  </TableCell>
 
                   <TableCell align="center">
                     <Typography variant="body2" sx={{ fontWeight: 800}}>{new Date(ticket.createdAt).toLocaleDateString('he-IL')}</Typography>

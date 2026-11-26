@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { Paper, Stack, TextField, MenuItem, Button, Typography } from '@mui/material';
 import { Priority } from '../types';
+import { priorityLabels, priorityOptions } from '../constants';
 import type { CreateTicketData } from '../types';
-
 interface TicketFormProps {
   onCreate: (data: CreateTicketData) => Promise<void>;
 }
-
 const TicketForm = ({ onCreate }: TicketFormProps) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -38,9 +37,9 @@ const TicketForm = ({ onCreate }: TicketFormProps) => {
         <TextField label="כותרת" value={title} onChange={(e) => setTitle(e.target.value)} />
         <TextField label="תיאור הבעיה" value={description} onChange={(e) => setDescription(e.target.value)} multiline rows={3} />
         <TextField select label="דחיפות" value={priority} onChange={(e) => setPriority(Number(e.target.value) as Priority)}>
-          <MenuItem value={Priority.Low}>נמוכה</MenuItem>
-          <MenuItem value={Priority.Medium}>בינונית</MenuItem>
-          <MenuItem value={Priority.High}>גבוה</MenuItem>
+          {priorityOptions.map((p) => (
+            <MenuItem key={p} value={p}>{priorityLabels[p]}</MenuItem>
+          ))}
         </TextField>
         {formError && <Typography color="error">{formError}</Typography>}
         <Button variant="contained" onClick={handleSubmit} disabled={submitting}>

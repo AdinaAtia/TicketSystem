@@ -8,21 +8,13 @@ import { TicketStatus } from './types';
 import TicketFilters from './components/TicketFilters';
 const App = () => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<TicketStatus | ''>('');
   const [search, setSearch] = useState('');
-  const fetchTickets = async () => {
+  const handleFilterChange = (value: TicketStatus | '') => {
     setLoading(true);
-    setError(null);
-    try {
-      const data = await getTickets(statusFilter === '' ? undefined : statusFilter);
-      setTickets(data);
-    } catch {
-      setError('לא ניתן לטעון את הקריאות. בדקו שהשרת פועל ונסו שוב.');
-    } finally {
-      setLoading(false);
-    }
+    setStatusFilter(value);
   };
   const handleCreate = async (data: CreateTicketData) => {
     try {
@@ -55,7 +47,23 @@ const App = () => {
     }
   };
   useEffect(() => {
-    fetchTickets();
+    let ignore = false;
+    getTickets(statusFilter === '' ? undefined : statusFilter)
+      .then((data) => {
+        if (!ignore) {
+          setTickets(data);
+          setError(null);
+        }
+      })
+      .catch(() => {
+        if (!ignore) setError('לא ניתן לטעון את הקריאות. בדקו שהשרת פועל ונסו שוב.');
+      })
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
+    return () => {
+      ignore = true;
+    };
   }, [statusFilter]);
   const filteredTickets = tickets.filter((t) =>
     t.title.toLowerCase().includes(search.trim().toLowerCase())
@@ -67,8 +75,7 @@ const App = () => {
         {loading && <CircularProgress />}
         {error && <Alert severity="error">{error}</Alert>}
         <TicketForm onCreate={handleCreate} />
-        <TicketFilters status={statusFilter} onStatusChange={setStatusFilter} search={search} onSearchChange={setSearch} />
-        <TicketTable tickets={filteredTickets} onStatusChange={handleStatusChange} onDelete={handleDelete} />     </Container>
+        <TicketFilters status={statusFilter} onStatusChange={handleFilterChange} search={search} onSearchChange={setSearch} />        <TicketTable tickets={filteredTickets} onStatusChange={handleStatusChange} onDelete={handleDelete} />     </Container>
     </Box>
   );
 };

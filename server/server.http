@@ -1,6 +1,44 @@
-@server_HostAddress = http://localhost:5244
+@host = http://localhost:5244
 
-GET {{server_HostAddress}}/weatherforecast/
-Accept: application/json
+### 1. כל הקריאות
+GET {{host}}/api/tickets
 
-###
+### 2. יצירת קריאה
+POST {{host}}/api/tickets
+Content-Type: application/json
+
+{
+  "title": "המחשב לא נדלק",
+  "description": "לחצתי על כפתור ההפעלה ולא קרה כלום",
+  "priority": 2
+}
+
+### 3. יצירה עם כותרת ריקה (צריך להחזיר 400)
+POST {{host}}/api/tickets
+Content-Type: application/json
+
+{
+  "title": "",
+  "description": "בדיקה",
+  "priority": 0
+}
+
+### 4. סינון לפי סטטוס פתוח
+GET {{host}}/api/tickets?status=0
+
+### 5. סינון לפי דחיפות גבוהה
+GET {{host}}/api/tickets?priority=2
+
+### 6. עדכון סטטוס של קריאה 1 לסגור
+PATCH {{host}}/api/tickets/1/status
+Content-Type: application/json
+
+{
+  "status": 2
+}
+
+### 7. מחיקת קריאה 1
+DELETE {{host}}/api/tickets/1
+
+### 8. מחיקת קריאה שלא קיימת (צריך להחזיר 404)
+DELETE {{host}}/api/tickets/999
